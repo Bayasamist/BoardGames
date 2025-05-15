@@ -14,8 +14,8 @@ namespace BoardGames.UI
 
         public GameUI(Game game, CommandHandler commandHandler)
         {
-            CurrentGame = game;
-            CommandHandler = commandHandler;
+            CurrentGame = game ?? throw new ArgumentNullException(nameof(game));
+            CommandHandler = commandHandler ?? throw new ArgumentNullException(nameof(commandHandler));
         }
 
         public void Run()
@@ -41,28 +41,23 @@ namespace BoardGames.UI
         {
             Console.Clear();
             Console.WriteLine("Welcome to the Board Game Framework!");
-            Console.WriteLine("Type 'help' for a list of available commands.");
-            Console.WriteLine();
+            Console.WriteLine("Type 'help' for a list of available commands.\n");
         }
 
         protected virtual void DisplayGame()
         {
             Console.Clear();
             Console.WriteLine(CurrentGame.ToString());
-            Console.WriteLine($"Current player: {CurrentGame.CurrentPlayer}");
+            Console.WriteLine($"Current player: {CurrentGame.CurrentPlayer?.Name}");
             Console.WriteLine();
         }
 
         protected virtual void HandlePlayerTurn()
         {
             if (CurrentGame.CurrentPlayer.IsComputer)
-            {
                 HandleComputerTurn();
-            }
             else
-            {
                 HandleHumanTurn();
-            }
         }
 
         protected virtual void HandleHumanTurn()
@@ -162,13 +157,9 @@ namespace BoardGames.UI
             Console.WriteLine("Game over!");
 
             if (CurrentGame.Winner != null)
-            {
                 Console.WriteLine($"{CurrentGame.Winner.Name} wins!");
-            }
             else
-            {
                 Console.WriteLine("It's a draw!");
-            }
 
             Console.WriteLine("\nPress any key to exit...");
             Console.ReadKey(true);

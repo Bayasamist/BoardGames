@@ -8,35 +8,36 @@ namespace BoardGames.Games.Gomoku
     {
         private GomokuBoard GomokuBoard => (GomokuBoard)Board;
 
-        public Gomoku(List<Player> players) : base(new GomokuBoard(15, 15), players) { }
+        public Gomoku(List<Player> players)
+            : base(new GomokuBoard(15, 15), players) { }
 
         public override bool IsValidMove(Move move)
         {
-            if (move is GomokuMove m)
-                return GomokuBoard.IsCellEmpty(m.Row, m.Column);
+            if (move is GomokuMove gm)
+                return GomokuBoard.IsCellEmpty(gm.Row, gm.Column);
             return false;
         }
 
         protected override void ExecuteMove(Move move)
         {
-            var m = (GomokuMove)move;
-            GomokuBoard.PlaceSymbol(m.Row, m.Column, m.Player.Symbol.ToString());
+            var gm = (GomokuMove)move;
+            GomokuBoard.PlaceSymbol(gm.Row, gm.Column, gm.Player.Symbol.ToString());
         }
 
         protected override void UndoMove(Move move)
         {
-            var m = (GomokuMove)move;
-            GomokuBoard.UndoSymbol(m.Row, m.Column);
+            var gm = (GomokuMove)move;
+            GomokuBoard.UndoSymbol(gm.Row, gm.Column);
         }
 
         protected override void CheckGameOver()
         {
-            if (MoveHistory.TryPeek(out Move lastMove) && lastMove is GomokuMove m)
+            if (MoveHistory.TryPeek(out Move lastMove) && lastMove is GomokuMove gm)
             {
-                if (GomokuBoard.HasFiveInRow(m.Row, m.Column, m.Player.Symbol.ToString()))
+                if (GomokuBoard.HasFiveInRow(gm.Row, gm.Column, gm.Player.Symbol.ToString()))
                 {
                     IsGameOver = true;
-                    Winner = m.Player;
+                    Winner = gm.Player;
                 }
             }
         }
@@ -51,8 +52,8 @@ namespace BoardGames.Games.Gomoku
             return moves;
         }
 
-        public override GameState GetGameState() => null;
-        public override void RestoreGameState(GameState gameState) { }
+        public override GameState GetGameState() => throw new NotImplementedException();
+        public override void RestoreGameState(GameState gameState) => throw new NotImplementedException();
 
         public override string ToString() => GomokuBoard.ToString();
     }

@@ -71,38 +71,6 @@ namespace BoardGames.Games.TicTacToe
             return sum == TargetSum;
         }
 
-        public void Display()
-        {
-            Console.WriteLine();
-            Console.Write("   ");
-            for (int col = 0; col < Size; col++)
-                Console.Write($" {col + 1}  ");
-            Console.WriteLine();
-
-            for (int row = 0; row < Size; row++)
-            {
-                Console.Write("   ");
-                for (int col = 0; col < Size; col++)
-                    Console.Write("+---");
-                Console.WriteLine("+");
-
-                Console.Write($" {row + 1} ");
-                for (int col = 0; col < Size; col++)
-                {
-                    int value = SetGrid[row, col];
-                    string display = value == 0 ? " " : value.ToString();
-                    if (value < 10 && value > 0)
-                        display = " " + display;
-                    Console.Write($"|{display} ");
-                }
-                Console.WriteLine("|");
-            }
-
-            Console.Write("   ");
-            for (int col = 0; col < Size; col++)
-                Console.Write("+---");
-            Console.WriteLine("+");
-        }
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -140,15 +108,16 @@ namespace BoardGames.Games.TicTacToe
             return sb.ToString();
         }
 
-
         public override Board Clone()
         {
+            if (Size <= 0 || SetGrid.GetLength(0) != Size || SetGrid.GetLength(1) != Size)
+                throw new InvalidOperationException("Cannot clone an invalid board state.");
+
             var clone = new NumericalTicTacToeBoard(Size);
             for (int row = 0; row < Size; row++)
                 for (int col = 0; col < Size; col++)
-                    clone.SetGrid[row, col] = this.SetGrid[row, col];
+                    clone.SetGrid[row, col] = SetGrid[row, col];
             return clone;
         }
-
     }
 }

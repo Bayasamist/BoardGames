@@ -20,10 +20,11 @@ namespace BoardGames.Players
             if (game is Notakto notaktoGame)
             {
                 var moves = notaktoGame.GetAvailableMoves();
-                var strategic = moves.GroupBy(m => ((NotaktoMove)m).BoardIndex)
-                                      .OrderBy(g => g.Count())
-                                      .FirstOrDefault();
-                return strategic?.FirstOrDefault();
+                return moves
+                    .GroupBy(m => ((NotaktoMove)m).BoardIndex)
+                    .OrderBy(g => g.Count())
+                    .FirstOrDefault()
+                    ?.FirstOrDefault();
             }
 
             if (game is Gomoku gomokuGame)
@@ -33,11 +34,13 @@ namespace BoardGames.Players
                     .GetProperty("Board", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     ?.GetValue(gomokuGame) as GomokuBoard;
 
+                if (board == null) return moves.FirstOrDefault();
+
                 // Try to win
                 foreach (var move in moves.Cast<GomokuMove>())
                 {
-                    board.PlaceSymbol(move.Row, move.Column, this.Symbol.ToString());
-                    if (board.HasFiveInRow(move.Row, move.Column, this.Symbol.ToString()))
+                    board.PlaceSymbol(move.Row, move.Column, Symbol.ToString());
+                    if (board.HasFiveInRow(move.Row, move.Column, Symbol.ToString()))
                     {
                         board.UndoSymbol(move.Row, move.Column);
                         return move;
@@ -47,7 +50,8 @@ namespace BoardGames.Players
 
                 // Try to block
                 var opponent = game.Players.FirstOrDefault(p => p != this);
-                string opponentSymbol = opponent?.Symbol.ToString();
+                var opponentSymbol = opponent?.Symbol?.ToString();
+
                 foreach (var move in moves.Cast<GomokuMove>())
                 {
                     board.PlaceSymbol(move.Row, move.Column, opponentSymbol);
@@ -62,9 +66,7 @@ namespace BoardGames.Players
                 // Take center if free
                 int center = board.Rows / 2;
                 if (board.IsCellEmpty(center, center))
-                {
                     return new GomokuMove(this, center, center);
-                }
 
                 return moves.FirstOrDefault();
             }
@@ -83,6 +85,7 @@ namespace BoardGames.Players
                                    ?? (opponent as ComPlayer)?.AvailableNumbers
                                    ?? new List<int>();
 
+                // Try to win
                 foreach (var number in AvailableNumbers)
                 {
                     for (int row = 0; row < board.Size; row++)
@@ -101,6 +104,7 @@ namespace BoardGames.Players
                     }
                 }
 
+                // Try to block
                 foreach (var number in opponentNumbers)
                 {
                     for (int row = 0; row < board.Size; row++)
@@ -126,10 +130,9 @@ namespace BoardGames.Players
 
                 int ticCenter = board.Size / 2;
                 if (ticCenter >= 0 && ticCenter < board.Size && board.IsCellEmpty(ticCenter, ticCenter))
-                {
                     return new NumericalTicTacToeMove(this, ticCenter, ticCenter, AvailableNumbers[0]);
-                }
 
+                // Fallback to first available spot
                 foreach (var number in AvailableNumbers)
                 {
                     for (int row = 0; row < board.Size; row++)

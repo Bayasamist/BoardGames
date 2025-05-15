@@ -8,7 +8,8 @@ namespace BoardGames.Games.Notakto
     {
         private NotaktoBoard NotaktoBoard => (NotaktoBoard)Board;
 
-        public Notakto(List<Player> players) : base(new NotaktoBoard(), players) { }
+        public Notakto(List<Player> players)
+            : base(new NotaktoBoard(), players) { }
 
         public override bool IsValidMove(Move move)
         {
@@ -34,23 +35,30 @@ namespace BoardGames.Games.Notakto
             if (NotaktoBoard.IsGameOver())
             {
                 IsGameOver = true;
-                Winner = Players[(CurrentPlayerIndex + 1) % Players.Count]; 
+                Winner = Players[(CurrentPlayerIndex + 1) % Players.Count]; // Opponent wins
             }
         }
 
         public override List<Move> GetAvailableMoves()
         {
-            List<Move> moves = new List<Move>();
-            for (int b = 0; b < 3; b++)
-                for (int r = 0; r < 3; r++)
-                    for (int c = 0; c < 3; c++)
-                        if (NotaktoBoard.IsValidMove(b, r, c))
-                            moves.Add(new NotaktoMove(CurrentPlayer, b, r, c));
+            List<Move> moves = new();
+            for (int boardIndex = 0; boardIndex < 3; boardIndex++)
+                for (int row = 0; row < 3; row++)
+                    for (int col = 0; col < 3; col++)
+                        if (NotaktoBoard.IsValidMove(boardIndex, row, col))
+                            moves.Add(new NotaktoMove(CurrentPlayer, boardIndex, row, col));
             return moves;
         }
 
-        public override GameState GetGameState() => null;
-        public override void RestoreGameState(GameState gameState) { }
+        public override GameState GetGameState()
+        {
+            throw new NotImplementedException("GameState saving not implemented for Notakto.");
+        }
+
+        public override void RestoreGameState(GameState gameState)
+        {
+            throw new NotImplementedException("RestoreGameState is not yet supported for Notakto.");
+        }
 
         public override string ToString()
         {

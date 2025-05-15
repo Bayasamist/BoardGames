@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using BoardGames.Core;
 
 namespace BoardGames.Core
 {
+
     public abstract class Game
     {
         protected Board Board { get; set; }
@@ -14,6 +14,7 @@ namespace BoardGames.Core
         protected Stack<Move> RedoStack { get; set; } = new();
         public bool IsGameOver { get; protected set; }
         public Player Winner { get; protected set; }
+
         public Player CurrentPlayer => Players[CurrentPlayerIndex];
 
         protected Game(Board board, List<Player> players)
@@ -28,7 +29,7 @@ namespace BoardGames.Core
 
         public virtual bool MakeMove(Move move)
         {
-            if (IsGameOver || !IsValidMove(move))
+            if (IsGameOver || move == null || !IsValidMove(move))
                 return false;
 
             ExecuteMove(move);
@@ -44,6 +45,7 @@ namespace BoardGames.Core
 
         public abstract bool IsValidMove(Move move);
         protected abstract void ExecuteMove(Move move);
+        protected abstract void UndoMove(Move move);
         protected abstract void CheckGameOver();
 
         protected virtual void SwitchPlayer()
@@ -56,7 +58,7 @@ namespace BoardGames.Core
             if (MoveHistory.Count == 0)
                 return false;
 
-            Move lastMove = MoveHistory.Pop();
+            var lastMove = MoveHistory.Pop();
             RedoStack.Push(lastMove);
             UndoMove(lastMove);
             IsGameOver = false;
@@ -71,9 +73,9 @@ namespace BoardGames.Core
             if (RedoStack.Count == 0)
                 return false;
 
-            Move lastUndoneMove = RedoStack.Pop();
-            ExecuteMove(lastUndoneMove);
-            MoveHistory.Push(lastUndoneMove);
+            var move = RedoStack.Pop();
+            ExecuteMove(move);
+            MoveHistory.Push(move);
             CheckGameOver();
 
             if (!IsGameOver)
@@ -82,14 +84,10 @@ namespace BoardGames.Core
             return true;
         }
 
-        protected abstract void UndoMove(Move move);
         public abstract GameState GetGameState();
         public abstract void RestoreGameState(GameState gameState);
         public abstract List<Move> GetAvailableMoves();
 
-        public override string ToString()
-        {
-            return Board.ToString();
-        }
+        public override string ToString() => Board.ToString();
     }
 }

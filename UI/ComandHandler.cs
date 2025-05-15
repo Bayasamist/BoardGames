@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace BoardGames.UI
@@ -17,7 +16,7 @@ namespace BoardGames.UI
 
         public CommandHandler(Game game)
         {
-            CurrentGame = game;
+            CurrentGame = game ?? throw new ArgumentNullException(nameof(game));
             ShouldExit = false;
 
             if (!Directory.Exists(SaveDirectory))
@@ -29,7 +28,7 @@ namespace BoardGames.UI
             if (string.IsNullOrWhiteSpace(command))
                 return false;
 
-            string[] parts = command.Trim().ToLower().Split(' ');
+            string[] parts = command.Trim().ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
             string action = parts[0];
 
             switch (action)
@@ -62,12 +61,12 @@ namespace BoardGames.UI
         {
             Console.WriteLine("\n=== GAME HELP ===");
             Console.WriteLine("General Commands:");
-            Console.WriteLine("  help      - Show this help information");
-            Console.WriteLine("  undo      - Undo the last move");
-            Console.WriteLine("  redo      - Redo the last undone move");
-            Console.WriteLine("  save [name] - Save the current game state (default name: 'default')");
-            Console.WriteLine("  load [name] - Load a saved game state (default name: 'default')");
-            Console.WriteLine("  exit      - Exit the game");
+            Console.WriteLine("  help           - Show this help menu");
+            Console.WriteLine("  undo           - Undo the last move");
+            Console.WriteLine("  redo           - Redo the last undone move");
+            Console.WriteLine("  save [name]    - Save the game (default: 'default')");
+            Console.WriteLine("  load [name]    - Load a saved game (default: 'default')");
+            Console.WriteLine("  exit           - Exit the game");
             Console.WriteLine("\nGame-Specific Commands:");
             ShowGameHelp();
             Console.WriteLine();
@@ -75,25 +74,20 @@ namespace BoardGames.UI
 
         protected virtual void ShowGameHelp()
         {
+            // Override to add custom game instructions
         }
 
         protected bool Undo()
         {
             bool result = CurrentGame.Undo();
-            if (result)
-                Console.WriteLine("Move undone.");
-            else
-                Console.WriteLine("No moves to undo.");
+            Console.WriteLine(result ? "Move undone." : "No moves to undo.");
             return result;
         }
 
         protected bool Redo()
         {
             bool result = CurrentGame.Redo();
-            if (result)
-                Console.WriteLine("Move redone.");
-            else
-                Console.WriteLine("No moves to redo.");
+            Console.WriteLine(result ? "Move redone." : "No moves to redo.");
             return result;
         }
 
@@ -102,8 +96,11 @@ namespace BoardGames.UI
             try
             {
                 GameState gameState = CurrentGame.GetGameState();
-                string json = JsonSerializer.Serialize(gameState);
+                if (gameState == null) throw new InvalidOperationException("GameState is null.");
+
                 string filePath = Path.Combine(SaveDirectory, $"{name}.json");
+                string json = JsonSerializer.Serialize(gameState, new JsonSerializerOptions { WriteIndented = true });
+
                 File.WriteAllText(filePath, json);
                 Console.WriteLine($"Game saved as '{name}'.");
                 return true;
@@ -127,7 +124,14 @@ namespace BoardGames.UI
                 }
 
                 string json = File.ReadAllText(filePath);
-                GameState gameState = JsonSerializer.Deserialize<GameState>(json);
+                var gameState = JsonSerializer.Deserialize<GameState>(json);
+
+                if (gameState == null)
+                {
+                    Console.WriteLine("Failed to deserialize game state.");
+                    return false;
+                }
+
                 CurrentGame.RestoreGameState(gameState);
                 Console.WriteLine($"Game '{name}' loaded successfully.");
                 return true;

@@ -44,7 +44,8 @@ namespace BoardGames.Games.Notakto
 
         public bool IsValidMove(int b, int r, int c)
         {
-            return !Completed[b] && Boards[b][r, c] == ' ';
+            return b >= 0 && b < 3 && r >= 0 && r < 3 && c >= 0 && c < 3 &&
+                   !Completed[b] && Boards[b][r, c] == ' ';
         }
 
         public void ApplyMove(int b, int r, int c)
@@ -76,9 +77,9 @@ namespace BoardGames.Games.Notakto
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("========== GOMOKU ==========");
-            sb.AppendLine("Enter your move as: board row col (e.g. 1 8 8)");
-            sb.AppendLine("First to get 3 in a row on any board wins!\n");
+            sb.AppendLine("========== NOTAKTO ==========");
+            sb.AppendLine("Enter your move as: board row col (e.g. 1 2 3)");
+            sb.AppendLine("Try not to complete a board! Last player to move wins if all boards are completed.\n");
 
             for (int b = 0; b < 3; b++)
             {

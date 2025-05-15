@@ -28,7 +28,7 @@ namespace BoardGames.Games.Gomoku
             var copy = new GomokuBoard(Rows, Columns);
             for (int r = 0; r < Rows; r++)
                 for (int c = 0; c < Columns; c++)
-                    copy.Grid[r, c] = this.Grid[r, c];
+                    copy.Grid[r, c] = Grid[r, c];
             return copy;
         }
 
@@ -40,10 +40,10 @@ namespace BoardGames.Games.Gomoku
 
         public bool HasFiveInRow(int row, int col, string symbol)
         {
-            return CheckDirection(row, col, 1, 0, symbol) ||
-                   CheckDirection(row, col, 0, 1, symbol) ||
-                   CheckDirection(row, col, 1, 1, symbol) ||
-                   CheckDirection(row, col, 1, -1, symbol);
+            return CheckDirection(row, col, 1, 0, symbol) ||  // Horizontal
+                   CheckDirection(row, col, 0, 1, symbol) ||  // Vertical
+                   CheckDirection(row, col, 1, 1, symbol) ||  // Diagonal down
+                   CheckDirection(row, col, 1, -1, symbol);   // Diagonal up
         }
 
         private bool CheckDirection(int row, int col, int dr, int dc, string symbol)
@@ -79,7 +79,7 @@ namespace BoardGames.Games.Gomoku
 
             sb.Append("    ");
             for (int c = 0; c < Columns; c++)
-                sb.Append($" {c + 1,2} "); 
+                sb.Append($" {c + 1,2} ");
             sb.AppendLine();
 
             sb.Append("   +");
@@ -89,7 +89,7 @@ namespace BoardGames.Games.Gomoku
 
             for (int r = 0; r < Rows; r++)
             {
-                sb.Append($"{r + 1,2} |"); 
+                sb.Append($"{r + 1,2} |");
 
                 for (int c = 0; c < Columns; c++)
                 {
@@ -106,6 +106,5 @@ namespace BoardGames.Games.Gomoku
 
             return sb.ToString();
         }
-
     }
 }
